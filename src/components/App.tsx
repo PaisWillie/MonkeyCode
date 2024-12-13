@@ -31,9 +31,14 @@ const isMatchingChars = (input: InputEntry) => {
   )
 }
 
-const numCorrectChars = (input: InputEntry[]) =>
+const getNumCorrectChars = (
+  input: InputEntry[],
+  includeIncompleteWords?: boolean
+) =>
   input
-    .filter((entry) => isMatchingChars(entry))
+    .filter((entry) => {
+      return includeIncompleteWords || isMatchingChars(entry)
+    })
     .reduce((acc, entry) => {
       return (
         acc +
@@ -43,14 +48,59 @@ const numCorrectChars = (input: InputEntry[]) =>
       )
     }, 0)
 
-// accuracy is the number of correct characters divided by the total number of characters
+// Number of extra characters typed (past the length of the actual characters)
+const getNumExtraChars = (input: InputEntry[]) =>
+  input.reduce((acc, entry) => {
+    return (
+      acc +
+      Math.min(
+        Math.max(entry.typedChars.length - entry.actualChars.length, 0),
+        entry.actualChars.length
+      )
+    )
+  }, 0)
+
+// Number of total characters needed to type
+const getTotalChars = (input: InputEntry[]) =>
+  input.reduce((acc, entry) => acc + entry.actualChars.length, 0)
+
+// Accuracy = (Number of correct characters) / (Total number of characters)
 const getAccuracy = (input: InputEntry[]) => {
-  const totalChars = input.reduce(
-    (acc, entry) => acc + entry.actualChars.length,
-    0
-  )
-  return totalChars ? numCorrectChars(input) / totalChars : 0
+  const totalChars = getTotalChars(input)
+  return totalChars ? getNumCorrectChars(input) / totalChars : 0
 }
+
+// Raw accuracy = (Number of correct characters - Number of extra characters) / (Total number of characters)
+const getRawAccuracy = (input: InputEntry[]) => {
+  const totalChars = getTotalChars(input)
+  return totalChars
+    ? (getNumCorrectChars(input, true) - getNumExtraChars(input)) / totalChars
+    : 0
+}
+
+// Characters per minute = (Number of correct characters + Number of space/enter inputs) / (Time taken in minutes)
+const getCPM = (
+  input: InputEntry[],
+  startTime: number,
+  endTime: number,
+  numSpaceEnterInputs: number
+) =>
+  (
+    (getNumCorrectChars(input) + numSpaceEnterInputs) /
+    ((endTime - startTime) / 1000 / 60)
+  ).toFixed(0)
+
+// Raw characters per minute = (Number of correct characters + Number of space/enter inputs) / (Time taken in minutes)
+const getRawCPM = (
+  input: InputEntry[],
+  startTime: number,
+  endTime: number,
+  numSpaceEnterInputs: number
+) =>
+  (
+    (getNumCorrectChars(input, true) + numSpaceEnterInputs) /
+    ((endTime - startTime) / 1000 / 60)
+  ).toFixed(0)
 
 function App() {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -271,7 +321,7 @@ function App() {
                       lineIndex === currLine ? (
                       <span
                         key={`${lineIndex}-${wordIndex}-${charIndex}`}
-                        className="text-red-500"
+                        className="text-red-700"
                       >
                         {char}
                         <span className="absolute -translate-x-1 animate-blink text-white">
@@ -282,7 +332,7 @@ function App() {
                       <span
                         key={`${lineIndex}-${wordIndex}-${charIndex}`}
                         className={clsx(
-                          'text-red-500',
+                          'text-red-700',
                           !isMatchingChars(
                             input.find(
                               (entry) =>
@@ -347,7 +397,7 @@ function App() {
         </p>
         <p>
           Correct characters:
-          {numCorrectChars(input)}
+          {getNumCorrectChars(input)}
         </p>
         <p>Space/Enter inputs: {numSpaceEnterInputs}</p>
         <p>
@@ -365,14 +415,17 @@ function App() {
             : 'Not finished'}
         </p>
         <p>Accuracy: {(getAccuracy(input) * 100).toFixed(0)}%</p>
+        <p>Raw accuracy: {(getRawAccuracy(input) * 100).toFixed(0)}%</p>
         <p>
           Characters per minute:{' '}
-          {/* only count correct characters + space/enter inputs in calculation*/}
           {startTime && endTime
-            ? (
-                (numCorrectChars(input) + numSpaceEnterInputs) /
-                ((endTime - startTime) / 1000 / 60)
-              ).toFixed(0)
+            ? getCPM(input, startTime, endTime, numSpaceEnterInputs)
+            : 'Not finished'}
+        </p>
+        <p>
+          Raw characters per minute:{' '}
+          {startTime && endTime
+            ? getRawCPM(input, startTime, endTime, numSpaceEnterInputs)
             : 'Not finished'}
         </p>
       </main>
