@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
+import { classNames } from 'utils'
 
 const snippet = `def threeSum(nums):
     nums.sort()
@@ -166,7 +167,26 @@ function App() {
                   {char}
                 </span>
               ) : (
-                <span key={`${lineIndex}-${wordIndex}-${charIndex}`}>
+                <span
+                  key={`${lineIndex}-${wordIndex}-${charIndex}`}
+                  className={classNames(
+                    char ===
+                      input.find(
+                        (entry) =>
+                          entry.lineIndex === lineIndex &&
+                          entry.wordIndex === wordIndex
+                      )?.typedChars[charIndex]
+                      ? 'text-white'
+                      : charIndex <
+                          (input.find(
+                            (entry) =>
+                              entry.lineIndex === lineIndex &&
+                              entry.wordIndex === wordIndex
+                          )?.typedChars.length ?? 0)
+                        ? 'text-red-500'
+                        : 'text-[#646669]'
+                  )}
+                >
                   {char}
                 </span>
               )
@@ -175,7 +195,7 @@ function App() {
             {input.find(
               (entry) =>
                 entry.lineIndex === lineIndex && entry.wordIndex === wordIndex
-            )?.typedChars.length || 0 > word.length
+            )?.typedChars.length ?? 0 > word.length
               ? input
                   .find(
                     (entry) =>
