@@ -38,6 +38,8 @@ function App() {
   const [currWord, setCurrWord] = useState<number>(0)
   const [currChar, setCurrChar] = useState<number>(0)
 
+  const [numSpaceEnterInputs, setNumSpaceEnterInputs] = useState<number>(0)
+
   const [input, setInput] = useState<InputEntry[]>([])
 
   const [startTime, setStartTime] = useState<number | null>(null)
@@ -84,6 +86,7 @@ function App() {
         .split(' ')
         .findIndex((word) => word.trim() !== '')
       setCurrWord(firstNonBlankWordIndex !== -1 ? firstNonBlankWordIndex : 0)
+      setNumSpaceEnterInputs((prev) => prev + 1)
     }
   }
 
@@ -95,6 +98,7 @@ function App() {
     // Move to next word
     setCurrWord((prev) => prev + 1)
     setCurrChar(0)
+    setNumSpaceEnterInputs((prev) => prev + 1)
   }
 
   const handleBackspaceKey = (wordsInLine: string[]) => {
@@ -109,6 +113,7 @@ function App() {
           entry.lineIndex === currLine && entry.wordIndex === currWord - 1
       )
       setCurrChar(previousWordEntry ? previousWordEntry.typedChars.length : 0)
+      setNumSpaceEnterInputs((prev) => prev - 1)
     } else {
       // Move to previous character
       setCurrChar((prev) => (prev ? prev - 1 : 0))
@@ -327,6 +332,7 @@ function App() {
               )
             }, 0)}
         </p>
+        <p>Space/Enter inputs: {numSpaceEnterInputs}</p>
         <p>
           Start time:{' '}
           {startTime ? new Date(startTime).toLocaleTimeString() : 'Not started'}
