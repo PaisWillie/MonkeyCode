@@ -98,7 +98,9 @@ const getRawCPM = (
   numSpaceEnterInputs: number
 ) =>
   (
-    (getNumCorrectChars(input, true) + numSpaceEnterInputs) /
+    (getNumCorrectChars(input, true) +
+      numSpaceEnterInputs -
+      getNumExtraChars(input)) /
     ((endTime - startTime) / 1000 / 60)
   ).toFixed(0)
 
