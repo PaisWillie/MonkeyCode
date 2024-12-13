@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { useRef, useState, useEffect } from 'react'
 import { classNames } from 'utils'
 
@@ -29,26 +30,44 @@ const snippet = `def threeSum(nums):
     return result
 `
 
+type InputEntry = {
+  lineIndex: number
+  wordIndex: number
+  actualChars: string[]
+  typedChars: string[]
+}
+
+const isMatchingChars = (input: InputEntry) => {
+  return (
+    input.typedChars.length === input.actualChars.length &&
+    input.typedChars.every(
+      (typedChar, typedCharIndex) =>
+        typedChar === input.actualChars[typedCharIndex]
+    )
+  )
+}
+
 function App() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [currLine, setCurrLine] = useState<number>(0)
   const [currWord, setCurrWord] = useState<number>(0)
   const [currChar, setCurrChar] = useState<number>(0)
-  const [input, setInput] = useState<
-    { lineIndex: number; wordIndex: number; typedChars: string[] }[]
-  >([])
+  const [input, setInput] = useState<InputEntry[]>([])
 
   useEffect(() => {
     const initializeInput = () => {
       const lines = snippet.split('\n')
-      const initialInput = lines.flatMap((line, lineIndex) =>
-        line.split(' ').map((_, wordIndex) => ({
-          lineIndex,
-          wordIndex,
-          typedChars: []
-        }))
-      )
+      const initialInput = lines
+        .flatMap((line, lineIndex) =>
+          line.split(' ').map((_, wordIndex) => ({
+            lineIndex,
+            wordIndex,
+            actualChars: line.split(' ')[wordIndex].split(''),
+            typedChars: []
+          }))
+        )
+        .filter((entry) => entry.actualChars.length > 0)
       setInput(initialInput)
     }
     initializeInput()
@@ -169,7 +188,7 @@ function App() {
               ) : (
                 <span
                   key={`${lineIndex}-${wordIndex}-${charIndex}`}
-                  className={classNames(
+                  className={clsx(
                     char ===
                       input.find(
                         (entry) =>
@@ -184,7 +203,22 @@ function App() {
                               entry.wordIndex === wordIndex
                           )?.typedChars.length ?? 0)
                         ? 'text-red-500'
-                        : 'text-[#646669]'
+                        : 'text-[#646669]',
+                    !isMatchingChars(
+                      input.find(
+                        (entry) =>
+                          entry.lineIndex === lineIndex &&
+                          entry.wordIndex === wordIndex
+                      ) ?? {
+                        lineIndex: -1,
+                        wordIndex: -1,
+                        actualChars: [],
+                        typedChars: []
+                      }
+                    ) &&
+                      ((currLine == lineIndex && currWord > wordIndex) ||
+                        currLine > lineIndex) &&
+                      'underline decoration-red-500'
                   )}
                 >
                   {char}
@@ -219,7 +253,23 @@ function App() {
                     ) : (
                       <span
                         key={`${lineIndex}-${wordIndex}-${charIndex}`}
-                        className="text-red-500"
+                        className={clsx(
+                          'text-red-500',
+                          !isMatchingChars(
+                            input.find(
+                              (entry) =>
+                                entry.lineIndex === lineIndex &&
+                                entry.wordIndex === wordIndex
+                            ) ?? {
+                              lineIndex: -1,
+                              wordIndex: -1,
+                              actualChars: [],
+                              typedChars: []
+                            }
+                          ) &&
+                            (currWord > wordIndex || currLine > lineIndex) &&
+                            'underline decoration-red-500'
+                        )}
                       >
                         {char}
                       </span>
@@ -260,6 +310,10 @@ function App() {
         ></input>
         <p>
           Line: {currLine} Word: {currWord} Char: {currChar}
+        </p>
+        <p>
+          Correct words:
+          {input.filter((entry) => isMatchingChars(entry)).length}
         </p>
       </main>
       <footer></footer>
