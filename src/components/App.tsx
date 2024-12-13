@@ -31,6 +31,27 @@ const isMatchingChars = (input: InputEntry) => {
   )
 }
 
+const numCorrectChars = (input: InputEntry[]) =>
+  input
+    .filter((entry) => isMatchingChars(entry))
+    .reduce((acc, entry) => {
+      return (
+        acc +
+        entry.typedChars.filter((char, charIndex) => {
+          return char === entry.actualChars[charIndex]
+        }).length
+      )
+    }, 0)
+
+// accuracy is the number of correct characters divided by the total number of characters
+const getAccuracy = (input: InputEntry[]) => {
+  const totalChars = input.reduce(
+    (acc, entry) => acc + entry.actualChars.length,
+    0
+  )
+  return totalChars ? numCorrectChars(input) / totalChars : 0
+}
+
 function App() {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -326,16 +347,7 @@ function App() {
         </p>
         <p>
           Correct characters:
-          {input
-            .filter((entry) => isMatchingChars(entry))
-            .reduce((acc, entry) => {
-              return (
-                acc +
-                entry.typedChars.filter((char, charIndex) => {
-                  return char === entry.actualChars[charIndex]
-                }).length
-              )
-            }, 0)}
+          {numCorrectChars(input)}
         </p>
         <p>Space/Enter inputs: {numSpaceEnterInputs}</p>
         <p>
@@ -345,6 +357,23 @@ function App() {
         <p>
           End time:{' '}
           {endTime ? new Date(endTime).toLocaleTimeString() : 'Not finished'}
+        </p>
+        <p>
+          Time taken:{' '}
+          {startTime && endTime
+            ? ((endTime - startTime) / 1000).toFixed(2)
+            : 'Not finished'}
+        </p>
+        <p>Accuracy: {(getAccuracy(input) * 100).toFixed(0)}%</p>
+        <p>
+          Characters per minute:{' '}
+          {/* only count correct characters + space/enter inputs in calculation*/}
+          {startTime && endTime
+            ? (
+                (numCorrectChars(input) + numSpaceEnterInputs) /
+                ((endTime - startTime) / 1000 / 60)
+              ).toFixed(0)
+            : 'Not finished'}
         </p>
       </main>
       <footer></footer>
