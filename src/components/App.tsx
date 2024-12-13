@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 
 const snippet = `def threeSum(nums):
-    nums.sort()  # Sort the array to make it easier to skip duplicates
+    nums.sort()
     result = []
 
     for i in range(len(nums) - 2):
@@ -26,32 +26,130 @@ const snippet = `def threeSum(nums):
                 right -= 1
 
     return result
-
-# Example usage
-nums = [-1, 0, 1, 2, -1, -4]
-print(threeSum(nums))
 `
 
 function App() {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [input, setInput] = useState<string>('')
+
+  const [currLine, setCurrLine] = useState<number>(0)
+  const [currWord, setCurrWord] = useState<number>(0)
+  const [currChar, setCurrChar] = useState<number>(0)
 
   const handlePreClick = () => {
     inputRef.current?.focus()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const wordsInLine = snippet.split('\n')[currLine].split(' ')
+    const lines = snippet.split('\n')
+
+    if (e.key === 'Enter') {
+      if (currWord !== wordsInLine.length - 1 || currChar === 0) {
+        return
+      }
+
+      // Move to next non-blank line
+      let nextLineIndex = currLine + 1
+      while (
+        nextLineIndex < lines.length &&
+        lines[nextLineIndex].trim() === ''
+      ) {
+        nextLineIndex++
+      }
+      if (nextLineIndex < lines.length) {
+        setCurrLine(nextLineIndex)
+        setCurrWord(0)
+        setCurrChar(0)
+        const nextLine = lines[nextLineIndex]
+        const firstNonBlankWordIndex = nextLine
+          .split(' ')
+          .findIndex((word) => word.trim() !== '')
+        setCurrWord(firstNonBlankWordIndex !== -1 ? firstNonBlankWordIndex : 0)
+      }
+    } else if (e.key === ' ') {
+      if (currChar === 0 || currWord === wordsInLine.length - 1) {
+        return
+      }
+
+      // Move to next word
+      setCurrWord((prev) => prev + 1)
+      setCurrChar(0)
+    } else if (e.key === 'Backspace') {
+      const firstNonBlankWordIndex = wordsInLine.findIndex(
+        (word) => word.trim() !== ''
+      )
+      if (currChar === 0 && currWord > firstNonBlankWordIndex) {
+        // Move to previous word
+        setCurrWord((prev) => prev - 1)
+        setCurrChar(
+          snippet.split('\n')[currLine].split(' ')[currWord - 1].length
+        )
+      } else {
+        // Move to previous character
+        setCurrChar((prev) => (prev ? prev - 1 : 0))
+      }
+    } else if (e.key.length === 1) {
+      // Move to next character
+      setCurrChar((prev) => prev + 1)
+    }
+  }
+
+  const renderSnippet = (snippet: string) => {
+    return snippet.split('\n').map((line, lineIndex) => (
+      <div key={lineIndex}>
+        {line.split(' ').map((word, wordIndex) => (
+          <span key={`${lineIndex}-${wordIndex}`}>
+            {word.split('').map((char, charIndex) =>
+              charIndex === currChar &&
+              wordIndex === currWord &&
+              lineIndex === currLine ? (
+                <span key={`${lineIndex}-${wordIndex}-${charIndex}`}>
+                  <span className="absolute -translate-x-1 animate-blink text-white">
+                    |
+                  </span>
+                  {char}
+                </span>
+              ) : (
+                <span key={`${lineIndex}-${wordIndex}-${charIndex}`}>
+                  {char}
+                </span>
+              )
+            )}
+            {wordIndex < line.split(' ').length - 1 &&
+              (wordIndex === currWord &&
+              lineIndex === currLine &&
+              word.length === currChar ? (
+                <span key={`space-${lineIndex}-${wordIndex}`}>
+                  <span className="absolute -translate-x-1 animate-blink text-white">
+                    |
+                  </span>{' '}
+                </span>
+              ) : (
+                <span key={`space-${lineIndex}-${wordIndex}`}> </span>
+              ))}
+          </span>
+        ))}
+        {lineIndex < snippet.split('\n').length - 1 && <br />}
+      </div>
+    ))
   }
 
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-between bg-[#323437] font-['Space_Mono'] text-[#646669]">
       <header></header>
       <main>
-        <pre onClick={handlePreClick}>{snippet}</pre>
+        <pre onClick={handlePreClick} className="cursor-text select-none">
+          {renderSnippet(snippet)}
+        </pre>
         <input
           className="absolute -top-10"
           ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          // onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
         ></input>
-        <p>Value: {input}</p>
+        <p>
+          Line: {currLine} Word: {currWord} Char: {currChar}
+        </p>
       </main>
       <footer></footer>
     </div>
