@@ -34,6 +34,8 @@ const isMatchingChars = (input: InputEntry) => {
 function App() {
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const [isFocused, setIsFocused] = useState<boolean>(false)
+
   const [currLine, setCurrLine] = useState<number>(0)
   const [currWord, setCurrWord] = useState<number>(0)
   const [currChar, setCurrChar] = useState<number>(0)
@@ -180,6 +182,7 @@ function App() {
         {line.split(' ').map((word, wordIndex) => (
           <span key={`${lineIndex}-${wordIndex}`}>
             {word.split('').map((char, charIndex) =>
+              isFocused &&
               charIndex === currChar &&
               wordIndex === currWord &&
               lineIndex === currLine ? (
@@ -281,7 +284,8 @@ function App() {
                   })
               : null}
             {wordIndex < line.split(' ').length - 1 &&
-              (wordIndex === currWord &&
+              (isFocused &&
+              wordIndex === currWord &&
               lineIndex === currLine &&
               word.length === currChar ? (
                 <span key={`space-${lineIndex}-${wordIndex}`}>
@@ -309,7 +313,8 @@ function App() {
         <input
           className="absolute -top-10"
           ref={inputRef}
-          // onChange={handleInputChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           onKeyDown={handleKeyDown}
         ></input>
         <p className="mt-4">
