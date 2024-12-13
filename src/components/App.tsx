@@ -1,34 +1,18 @@
 import clsx from 'clsx'
-import { useRef, useState, useEffect } from 'react'
-import { classNames } from 'utils'
+import { useEffect, useRef, useState } from 'react'
 
-const snippet = `def threeSum(nums):
-    nums.sort()
-    result = []
+const snippet = `def two_sum(nums, target):
+    num_map = {}
 
-    for i in range(len(nums) - 2):
-        if i > 0 and nums[i] == nums[i - 1]:
-            continue
+    for i, num in enumerate(nums):
+        complement = target - num
 
-        left, right = i + 1, len(nums) - 1
-        while left < right:
-            total = nums[i] + nums[left] + nums[right]
-            if total == 0:
-                result.append([nums[i], nums[left], nums[right]])
-                left += 1
-                right -= 1
+        if complement in num_map:
+            return [num_map[complement], i]
 
-                while left < right and nums[left] == nums[left - 1]:
-                    left += 1
-                while left < right and nums[right] == nums[right + 1]:
-                    right -= 1
-            elif total < 0:
-                left += 1
-            else:
-                right -= 1
+        num_map[num] = i
 
-    return result
-`
+    return []`
 
 type InputEntry = {
   lineIndex: number
@@ -53,7 +37,11 @@ function App() {
   const [currLine, setCurrLine] = useState<number>(0)
   const [currWord, setCurrWord] = useState<number>(0)
   const [currChar, setCurrChar] = useState<number>(0)
+
   const [input, setInput] = useState<InputEntry[]>([])
+
+  const [startTime, setStartTime] = useState<number | null>(null)
+  const [endTime, setEndTime] = useState<number | null>(null)
 
   useEffect(() => {
     const initializeInput = () => {
@@ -153,6 +141,17 @@ function App() {
       }
       return newInput
     })
+
+    if (currChar === 0 && currWord === 0 && currLine === 0 && !startTime) {
+      setStartTime(Date.now())
+    } else if (
+      // last character of last word of last line
+      currLine === snippet.split('\n').length - 1 &&
+      currWord === snippet.split('\n')[currLine].split(' ').length - 1 &&
+      currChar === snippet.split('\n')[currLine].split(' ')[currWord].length - 1
+    ) {
+      setEndTime(Date.now())
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -308,12 +307,33 @@ function App() {
           // onChange={handleInputChange}
           onKeyDown={handleKeyDown}
         ></input>
-        <p>
+        <p className="mt-4">
           Line: {currLine} Word: {currWord} Char: {currChar}
         </p>
         <p>
           Correct words:
           {input.filter((entry) => isMatchingChars(entry)).length}
+        </p>
+        <p>
+          Correct characters:
+          {input
+            .filter((entry) => isMatchingChars(entry))
+            .reduce((acc, entry) => {
+              return (
+                acc +
+                entry.typedChars.filter((char, charIndex) => {
+                  return char === entry.actualChars[charIndex]
+                }).length
+              )
+            }, 0)}
+        </p>
+        <p>
+          Start time:{' '}
+          {startTime ? new Date(startTime).toLocaleTimeString() : 'Not started'}
+        </p>
+        <p>
+          End time:{' '}
+          {endTime ? new Date(endTime).toLocaleTimeString() : 'Not finished'}
         </p>
       </main>
       <footer></footer>
