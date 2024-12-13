@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 
 const snippet = `def threeSum(nums):
     nums.sort()
@@ -34,6 +34,24 @@ function App() {
   const [currLine, setCurrLine] = useState<number>(0)
   const [currWord, setCurrWord] = useState<number>(0)
   const [currChar, setCurrChar] = useState<number>(0)
+  const [input, setInput] = useState<
+    { lineIndex: number; wordIndex: number; typedChars: string[] }[]
+  >([])
+
+  useEffect(() => {
+    const initializeInput = () => {
+      const lines = snippet.split('\n')
+      const initialInput = lines.flatMap((line, lineIndex) =>
+        line.split(' ').map((_, wordIndex) => ({
+          lineIndex,
+          wordIndex,
+          typedChars: []
+        }))
+      )
+      setInput(initialInput)
+    }
+    initializeInput()
+  }, [])
 
   const handlePreClick = () => {
     inputRef.current?.focus()
@@ -81,16 +99,43 @@ function App() {
       if (currChar === 0 && currWord > firstNonBlankWordIndex) {
         // Move to previous word
         setCurrWord((prev) => prev - 1)
-        setCurrChar(
-          snippet.split('\n')[currLine].split(' ')[currWord - 1].length
+        const previousWordEntry = input.find(
+          (entry) =>
+            entry.lineIndex === currLine && entry.wordIndex === currWord - 1
         )
+        setCurrChar(previousWordEntry ? previousWordEntry.typedChars.length : 0)
       } else {
         // Move to previous character
         setCurrChar((prev) => (prev ? prev - 1 : 0))
       }
+      setInput((prevInput) => {
+        const newInput = [...prevInput]
+        const existingEntryIndex = newInput.findIndex(
+          (entry) =>
+            entry.lineIndex === currLine && entry.wordIndex === currWord
+        )
+        if (
+          existingEntryIndex !== -1 &&
+          newInput[existingEntryIndex].typedChars.length > 0
+        ) {
+          newInput[existingEntryIndex].typedChars.pop()
+        }
+        return newInput
+      })
     } else if (e.key.length === 1) {
       // Move to next character
       setCurrChar((prev) => prev + 1)
+      setInput((prevInput) => {
+        const newInput = [...prevInput]
+        const existingEntryIndex = newInput.findIndex(
+          (entry) =>
+            entry.lineIndex === currLine && entry.wordIndex === currWord
+        )
+        if (existingEntryIndex !== -1) {
+          newInput[existingEntryIndex].typedChars.push(e.key)
+        }
+        return newInput
+      })
     }
   }
 
@@ -115,6 +160,41 @@ function App() {
                 </span>
               )
             )}
+            {/* Display extra characters typed */}
+            {input.find(
+              (entry) =>
+                entry.lineIndex === lineIndex && entry.wordIndex === wordIndex
+            )?.typedChars.length || 0 > word.length
+              ? input
+                  .find(
+                    (entry) =>
+                      entry.lineIndex === lineIndex &&
+                      entry.wordIndex === wordIndex
+                  )
+                  ?.typedChars.slice(word.length)
+                  .map((char, charIndex) => {
+                    return charIndex + word.length + 1 === currChar &&
+                      wordIndex === currWord &&
+                      lineIndex === currLine ? (
+                      <span
+                        key={`${lineIndex}-${wordIndex}-${charIndex}`}
+                        className="text-red-500"
+                      >
+                        {char}
+                        <span className="absolute -translate-x-1 animate-blink text-white">
+                          |
+                        </span>
+                      </span>
+                    ) : (
+                      <span
+                        key={`${lineIndex}-${wordIndex}-${charIndex}`}
+                        className="text-red-500"
+                      >
+                        {char}
+                      </span>
+                    )
+                  })
+              : null}
             {wordIndex < line.split(' ').length - 1 &&
               (wordIndex === currWord &&
               lineIndex === currLine &&
