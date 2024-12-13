@@ -57,85 +57,96 @@ function App() {
     inputRef.current?.focus()
   }
 
+  const handleEnterKey = (wordsInLine: string[], lines: string[]) => {
+    if (currWord !== wordsInLine.length - 1 || currChar === 0) {
+      return
+    }
+
+    // Move to next non-blank line
+    let nextLineIndex = currLine + 1
+    while (nextLineIndex < lines.length && lines[nextLineIndex].trim() === '') {
+      nextLineIndex++
+    }
+    if (nextLineIndex < lines.length) {
+      setCurrLine(nextLineIndex)
+      setCurrWord(0)
+      setCurrChar(0)
+      const nextLine = lines[nextLineIndex]
+      const firstNonBlankWordIndex = nextLine
+        .split(' ')
+        .findIndex((word) => word.trim() !== '')
+      setCurrWord(firstNonBlankWordIndex !== -1 ? firstNonBlankWordIndex : 0)
+    }
+  }
+
+  const handleSpaceKey = (wordsInLine: string[]) => {
+    if (currChar === 0 || currWord === wordsInLine.length - 1) {
+      return
+    }
+
+    // Move to next word
+    setCurrWord((prev) => prev + 1)
+    setCurrChar(0)
+  }
+
+  const handleBackspaceKey = (wordsInLine: string[]) => {
+    const firstNonBlankWordIndex = wordsInLine.findIndex(
+      (word) => word.trim() !== ''
+    )
+    if (currChar === 0 && currWord > firstNonBlankWordIndex) {
+      // Move to previous word
+      setCurrWord((prev) => prev - 1)
+      const previousWordEntry = input.find(
+        (entry) =>
+          entry.lineIndex === currLine && entry.wordIndex === currWord - 1
+      )
+      setCurrChar(previousWordEntry ? previousWordEntry.typedChars.length : 0)
+    } else {
+      // Move to previous character
+      setCurrChar((prev) => (prev ? prev - 1 : 0))
+    }
+    setInput((prevInput) => {
+      const newInput = [...prevInput]
+      const existingEntryIndex = newInput.findIndex(
+        (entry) => entry.lineIndex === currLine && entry.wordIndex === currWord
+      )
+      if (
+        existingEntryIndex !== -1 &&
+        newInput[existingEntryIndex].typedChars.length > 0
+      ) {
+        newInput[existingEntryIndex].typedChars.pop()
+      }
+      return newInput
+    })
+  }
+
+  const handleAlphanumericKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Move to next character
+    setCurrChar((prev) => prev + 1)
+    setInput((prevInput) => {
+      const newInput = [...prevInput]
+      const existingEntryIndex = newInput.findIndex(
+        (entry) => entry.lineIndex === currLine && entry.wordIndex === currWord
+      )
+      if (existingEntryIndex !== -1) {
+        newInput[existingEntryIndex].typedChars.push(e.key)
+      }
+      return newInput
+    })
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const wordsInLine = snippet.split('\n')[currLine].split(' ')
     const lines = snippet.split('\n')
 
     if (e.key === 'Enter') {
-      if (currWord !== wordsInLine.length - 1 || currChar === 0) {
-        return
-      }
-
-      // Move to next non-blank line
-      let nextLineIndex = currLine + 1
-      while (
-        nextLineIndex < lines.length &&
-        lines[nextLineIndex].trim() === ''
-      ) {
-        nextLineIndex++
-      }
-      if (nextLineIndex < lines.length) {
-        setCurrLine(nextLineIndex)
-        setCurrWord(0)
-        setCurrChar(0)
-        const nextLine = lines[nextLineIndex]
-        const firstNonBlankWordIndex = nextLine
-          .split(' ')
-          .findIndex((word) => word.trim() !== '')
-        setCurrWord(firstNonBlankWordIndex !== -1 ? firstNonBlankWordIndex : 0)
-      }
+      handleEnterKey(wordsInLine, lines)
     } else if (e.key === ' ') {
-      if (currChar === 0 || currWord === wordsInLine.length - 1) {
-        return
-      }
-
-      // Move to next word
-      setCurrWord((prev) => prev + 1)
-      setCurrChar(0)
+      handleSpaceKey(wordsInLine)
     } else if (e.key === 'Backspace') {
-      const firstNonBlankWordIndex = wordsInLine.findIndex(
-        (word) => word.trim() !== ''
-      )
-      if (currChar === 0 && currWord > firstNonBlankWordIndex) {
-        // Move to previous word
-        setCurrWord((prev) => prev - 1)
-        const previousWordEntry = input.find(
-          (entry) =>
-            entry.lineIndex === currLine && entry.wordIndex === currWord - 1
-        )
-        setCurrChar(previousWordEntry ? previousWordEntry.typedChars.length : 0)
-      } else {
-        // Move to previous character
-        setCurrChar((prev) => (prev ? prev - 1 : 0))
-      }
-      setInput((prevInput) => {
-        const newInput = [...prevInput]
-        const existingEntryIndex = newInput.findIndex(
-          (entry) =>
-            entry.lineIndex === currLine && entry.wordIndex === currWord
-        )
-        if (
-          existingEntryIndex !== -1 &&
-          newInput[existingEntryIndex].typedChars.length > 0
-        ) {
-          newInput[existingEntryIndex].typedChars.pop()
-        }
-        return newInput
-      })
+      handleBackspaceKey(wordsInLine)
     } else if (e.key.length === 1) {
-      // Move to next character
-      setCurrChar((prev) => prev + 1)
-      setInput((prevInput) => {
-        const newInput = [...prevInput]
-        const existingEntryIndex = newInput.findIndex(
-          (entry) =>
-            entry.lineIndex === currLine && entry.wordIndex === currWord
-        )
-        if (existingEntryIndex !== -1) {
-          newInput[existingEntryIndex].typedChars.push(e.key)
-        }
-        return newInput
-      })
+      handleAlphanumericKey(e)
     }
   }
 
