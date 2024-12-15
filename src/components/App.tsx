@@ -1,7 +1,42 @@
-import { useEffect, useRef, useState } from 'react'
+import { Button, ConfigProvider, Input, MenuProps, theme } from 'antd'
 import axios from 'axios'
+import {
+  LeetCodeCategories,
+  LeetCodeDifficulty,
+  LeetcodeProblems
+} from 'data/leetcode-problems'
+import { useEffect, useRef, useState } from 'react'
+import { BiText } from 'react-icons/bi'
+import { FaSortAlphaDown } from 'react-icons/fa'
+import {
+  FaAngular,
+  FaArrowRight,
+  FaFlutter,
+  FaHashtag,
+  FaJava,
+  FaPython,
+  FaReact,
+  FaSwift
+} from 'react-icons/fa6'
+import { GoXCircleFill } from 'react-icons/go'
+import {
+  MdAccountTree,
+  MdCheckCircle,
+  MdDataArray,
+  MdDoNotDisturbOn,
+  MdOutlineAccountTree,
+  MdOutlineCompareArrows
+} from 'react-icons/md'
+import { PiFileCSharp } from 'react-icons/pi'
+import {
+  SiCplusplus,
+  SiJavascript,
+  SiLeetcode,
+  SiTypescript
+} from 'react-icons/si'
+import { TbBinaryTree } from 'react-icons/tb'
+import DropdownSelect from './Prompt/DropdownSelect'
 import Snippet from './Snippet'
-import { Button } from 'antd'
 
 const testSnippet = `def two_sum(nums, target):
     num_map = {}
@@ -40,7 +75,7 @@ const getOpenAIResponse = async (prompt: string) => {
       {
         role: 'system',
         content:
-          "Generate code snippet based on user prompt. Don't include other info other than code snippet (no code comments)."
+          "Generate code snippet based on user prompt. Don't include other info other than code snippet (no code comments & no import/export calls)."
       },
       { role: 'user', content: prompt }
     ]
@@ -74,6 +109,37 @@ function App() {
   const [startTime, setStartTime] = useState<number | null>(null)
   const [endTime, setEndTime] = useState<number | null>(null)
 
+  type snippetTypes = 'LeetCode' | 'React' | 'Angular' | 'SwiftUI' | 'Flutter'
+
+  const [snippetType, setSnippetType] = useState<snippetTypes | undefined>()
+
+  const [snippetWebDevLang, setSnippetWebDevLang] = useState<
+    'JavaScript' | 'TypeScript' | undefined
+  >()
+
+  type leetCodeLangs =
+    | 'Python'
+    | 'Java'
+    | 'C++'
+    | 'C#'
+    | 'JavaScript'
+    | 'TypeScript'
+
+  const [snippetLeetCodeLang, setSnippetLeetCodeLang] = useState<
+    leetCodeLangs | undefined
+  >()
+
+  // use value of LeetCodeCategories
+  const [snippetLeetCodeTopic, setSnippetLeetCodeTopic] = useState<
+    LeetCodeCategories | 'a specific problem' | undefined
+  >()
+  const [snippetLeetCodeDifficulty, setSnippetLeetCodeDifficulty] = useState<
+    LeetCodeDifficulty | undefined
+  >()
+
+  const [snippetLeetCodeProblemNum, setSnippetLeetCodeProblemNum] =
+    useState<number>(0)
+
   useEffect(() => {
     const initializeInput = () => {
       const lines = snippet.split('\n')
@@ -92,56 +158,549 @@ function App() {
     initializeInput()
   }, [snippet])
 
-  return (
-    <div className="flex h-screen w-screen flex-col items-center justify-between bg-[#323437] font-['Space_Mono'] text-[#646669]">
-      <header></header>
-      <main>
-        <div className="flex flex-row">
-          <p className="text-slate-200">
-            I want to type [Leetcode] with [Python] about [any topic] on
-            [medium] difficulty
-          </p>
-          <Button
-            onClick={async () => {
-              const response = await getOpenAIResponse(
-                'Leetcode Java medium sliding window problem'
-              )
-              setSnippet(response.choices[0].message.content)
-              console.log(response)
-            }}
-          >
-            Generate
-          </Button>
-          {/* <p>
-            I want to type [Leetcode] with [C++] about [problem #] on
-            [medium] difficulty
-          </p> */}
-          {/* <p>I want to type [React] with [TypeScript]</p>
-          <p>I want to type [Swift] with [UIKit]</p> */}
+  const handleSelectSnippetType = (type: snippetTypes) => {
+    setSnippetWebDevLang(undefined)
+    setSnippetLeetCodeLang(undefined)
+    setSnippetLeetCodeTopic(undefined)
+    setSnippetLeetCodeDifficulty(undefined)
+    setSnippetLeetCodeProblemNum(0)
+
+    setSnippetWebDevLang(undefined)
+
+    setSnippetType(type)
+  }
+
+  const snippetTypes: MenuProps['items'] = [
+    {
+      key: 'leetcode',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => {
+            handleSelectSnippetType('LeetCode')
+          }}
+        >
+          <SiLeetcode />
+          <p>LeetCode</p>
         </div>
-        <Snippet
-          snippet={snippet}
-          input={input}
-          setInput={setInput}
-          currLine={currLine}
-          currWord={currWord}
-          currChar={currChar}
-          setCurrLine={setCurrLine}
-          setCurrWord={setCurrWord}
-          setCurrChar={setCurrChar}
-          numSpaceEnterInputs={numSpaceEnterInputs}
-          setNumSpaceEnterInputs={setNumSpaceEnterInputs}
-          startTime={startTime}
-          setStartTime={setStartTime}
-          endTime={endTime}
-          setEndTime={setEndTime}
-          isFocused={isFocused}
-          setIsFocused={setIsFocused}
-          inputRef={inputRef}
-        />
-      </main>
-      <footer></footer>
-    </div>
+      )
+    },
+    {
+      key: 'react',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetType('React')}
+        >
+          <FaReact />
+          <p>React</p>
+        </div>
+      )
+    },
+    {
+      key: 'angular',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetType('Angular')}
+        >
+          <FaAngular />
+          <p>Angular</p>
+        </div>
+      )
+    },
+    {
+      key: 'swiftui',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetType('SwiftUI')}
+        >
+          <FaSwift />
+          <p>SwiftUI</p>
+        </div>
+      )
+    },
+    {
+      key: 'flutter',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetType('Flutter')}
+        >
+          <FaFlutter />
+          <p>Flutter</p>
+        </div>
+      )
+    }
+  ]
+
+  const snippetWebDevLangs: MenuProps['items'] = [
+    {
+      key: 'javascript',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => setSnippetWebDevLang('JavaScript')}
+        >
+          <SiJavascript />
+          <p>JavaScript</p>
+        </div>
+      )
+    },
+    {
+      key: 'typescript',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => setSnippetWebDevLang('TypeScript')}
+        >
+          <SiTypescript />
+          <p>TypeScript</p>
+        </div>
+      )
+    }
+  ]
+
+  const handleSelectSnippetLeetCodeLang = (lang: leetCodeLangs) => {
+    setSnippetLeetCodeTopic(undefined)
+    setSnippetLeetCodeProblemNum(0)
+
+    setSnippetLeetCodeLang(lang)
+  }
+
+  const snippetLeetCodeLangs: MenuProps['items'] = [
+    {
+      key: 'python',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeLang('Python')}
+        >
+          <FaPython />
+          <p>Python</p>
+        </div>
+      )
+    },
+    {
+      key: 'java',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeLang('Java')}
+        >
+          <FaJava />
+          <p>Java</p>
+        </div>
+      )
+    },
+    {
+      key: 'c++',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeLang('C++')}
+        >
+          <SiCplusplus />
+          <p>C++</p>
+        </div>
+      )
+    },
+    {
+      key: 'c#',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeLang('C#')}
+        >
+          <PiFileCSharp />
+          <p>C#</p>
+        </div>
+      )
+    },
+    {
+      key: 'javascript',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeLang('JavaScript')}
+        >
+          <SiJavascript />
+          <p>JavaScript</p>
+        </div>
+      )
+    },
+    {
+      key: 'typescript',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeLang('TypeScript')}
+        >
+          <SiTypescript />
+          <p>TypeScript</p>
+        </div>
+      )
+    }
+  ]
+
+  const handleSelectSnippetLeetCodeTopic = (topic: LeetCodeCategories) => {
+    setSnippetLeetCodeDifficulty(undefined)
+    setSnippetLeetCodeProblemNum(0)
+
+    setSnippetLeetCodeTopic(topic)
+  }
+
+  const snippetLeetCodeTopics: MenuProps['items'] = [
+    {
+      key: 'arrays',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeTopic('Arrays')}
+        >
+          <MdDataArray />
+          <p>Arrays</p>
+        </div>
+      )
+    },
+    {
+      key: 'strings',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeTopic('Strings')}
+        >
+          <BiText />
+          <p>Strings</p>
+        </div>
+      )
+    },
+    {
+      key: 'sorting',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeTopic('Sorting')}
+        >
+          <FaSortAlphaDown />
+          <p>Sorting</p>
+        </div>
+      )
+    },
+    {
+      key: 'dfs',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeTopic('DFS')}
+        >
+          <MdAccountTree />
+          <p>DFS</p>
+        </div>
+      )
+    },
+    {
+      key: 'bfs',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeTopic('BFS')}
+        >
+          <MdOutlineAccountTree />
+          <p>BFS</p>
+        </div>
+      )
+    },
+    {
+      key: 'binary-search',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeTopic('Binary Search')}
+        >
+          <TbBinaryTree />
+          <p>Binary Search</p>
+        </div>
+      )
+    },
+    {
+      key: 'two-pointer',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeTopic('Two Pointer')}
+        >
+          <MdOutlineCompareArrows />
+          <p>Two Pointer</p>
+        </div>
+      )
+    },
+    {
+      key: 'a specific problem',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => handleSelectSnippetLeetCodeTopic('a specific problem')}
+        >
+          <FaHashtag />
+          <p>a specific problem</p>
+        </div>
+      )
+    }
+  ]
+
+  const snippetLeetCodeDifficulties: MenuProps['items'] = [
+    {
+      key: 'easy',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => setSnippetLeetCodeDifficulty('Easy')}
+        >
+          <MdCheckCircle />
+          <p>Easy</p>
+        </div>
+      )
+    },
+    {
+      key: 'medium',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => setSnippetLeetCodeDifficulty('Medium')}
+        >
+          <MdDoNotDisturbOn />
+          <p>Medium</p>
+        </div>
+      )
+    },
+    {
+      key: 'hard',
+      label: (
+        <div
+          className="flex items-center gap-2"
+          onClick={() => setSnippetLeetCodeDifficulty('Hard')}
+        >
+          <GoXCircleFill />
+          <p>Hard</p>
+        </div>
+      )
+    }
+  ]
+
+  return (
+    <ConfigProvider
+      theme={{
+        // 1. Use dark algorithm
+        algorithm: theme.darkAlgorithm
+      }}
+    >
+      <div className="flex h-screen w-screen flex-col items-center justify-between bg-[#323437] font-['Space_Mono'] text-[#646669]">
+        <header></header>
+        <main>
+          <div className="flex flex-row items-center gap-2 text-slate-200">
+            <p>I want to type</p>
+            <DropdownSelect items={snippetTypes} label={snippetType} />
+
+            {(snippetType === 'React' || snippetType === 'Angular') && (
+              <>
+                <p>with</p>
+                <DropdownSelect
+                  items={snippetWebDevLangs}
+                  label={snippetWebDevLang}
+                />
+              </>
+            )}
+
+            {snippetType === 'LeetCode' && (
+              <>
+                <p>with</p>
+                <DropdownSelect
+                  items={snippetLeetCodeLangs}
+                  label={snippetLeetCodeLang}
+                />
+                {snippetLeetCodeLang && (
+                  <>
+                    <p>about</p>
+                    <DropdownSelect
+                      items={snippetLeetCodeTopics}
+                      label={snippetLeetCodeTopic}
+                    />
+                    {snippetLeetCodeTopic !== undefined &&
+                      snippetLeetCodeTopic !== 'a specific problem' && (
+                        <>
+                          <p>on</p>
+                          <DropdownSelect
+                            items={snippetLeetCodeDifficulties}
+                            label={snippetLeetCodeDifficulty}
+                          />
+                          <p>difficulty</p>
+                        </>
+                      )}
+                    {snippetLeetCodeTopic === 'a specific problem' && (
+                      <>
+                        <p>#</p>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={3389}
+                          value={snippetLeetCodeProblemNum}
+                          onChange={(e) => {
+                            const inputValue = e.target.value
+                            const inputNum = parseInt(inputValue)
+
+                            if (
+                              inputValue === '' ||
+                              (inputNum >= 0 && inputNum <= 3389)
+                            ) {
+                              setSnippetLeetCodeProblemNum(inputNum)
+                            }
+                          }}
+                          className="max-w-fit"
+                        />
+                      </>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+            <Button
+              size="small"
+              color="primary"
+              variant="solid"
+              shape="circle"
+              icon={<FaArrowRight />}
+              onClick={async () => {
+                let prompt = ''
+
+                if (snippetType === 'LeetCode') {
+                  let problemNum = -1
+
+                  if (snippetLeetCodeTopic === 'a specific problem') {
+                    prompt = `Leetcode ${snippetLeetCodeLang} problem #${snippetLeetCodeProblemNum}`
+                  } else {
+                    if (!snippetLeetCodeDifficulty) {
+                      console.error('Difficulty not selected')
+                      return
+                    }
+
+                    if (snippetLeetCodeTopic === 'Arrays') {
+                      problemNum =
+                        LeetcodeProblems.Arrays[snippetLeetCodeDifficulty][
+                          Math.floor(
+                            Math.random() *
+                              LeetcodeProblems.Arrays[snippetLeetCodeDifficulty]
+                                .length
+                          )
+                        ]
+                    } else if (snippetLeetCodeTopic === 'Strings') {
+                      problemNum =
+                        LeetcodeProblems.Strings[snippetLeetCodeDifficulty][
+                          Math.floor(
+                            Math.random() *
+                              LeetcodeProblems.Strings[
+                                snippetLeetCodeDifficulty
+                              ].length
+                          )
+                        ]
+                    } else if (snippetLeetCodeTopic === 'Sorting') {
+                      problemNum =
+                        LeetcodeProblems.Sorting[snippetLeetCodeDifficulty][
+                          Math.floor(
+                            Math.random() *
+                              LeetcodeProblems.Sorting[
+                                snippetLeetCodeDifficulty
+                              ].length
+                          )
+                        ]
+                    } else if (snippetLeetCodeTopic === 'DFS') {
+                      problemNum =
+                        LeetcodeProblems.DFS[snippetLeetCodeDifficulty][
+                          Math.floor(
+                            Math.random() *
+                              LeetcodeProblems.DFS[snippetLeetCodeDifficulty]
+                                .length
+                          )
+                        ]
+                    } else if (snippetLeetCodeTopic === 'BFS') {
+                      problemNum =
+                        LeetcodeProblems.BFS[snippetLeetCodeDifficulty][
+                          Math.floor(
+                            Math.random() *
+                              LeetcodeProblems.BFS[snippetLeetCodeDifficulty]
+                                .length
+                          )
+                        ]
+                    } else if (snippetLeetCodeTopic === 'Binary Search') {
+                      problemNum =
+                        LeetcodeProblems['Binary Search'][
+                          snippetLeetCodeDifficulty
+                        ][
+                          Math.floor(
+                            Math.random() *
+                              LeetcodeProblems['Binary Search'][
+                                snippetLeetCodeDifficulty
+                              ].length
+                          )
+                        ]
+                    } else if (snippetLeetCodeTopic === 'Two Pointer') {
+                      problemNum =
+                        LeetcodeProblems['Two Pointer'][
+                          snippetLeetCodeDifficulty
+                        ][
+                          Math.floor(
+                            Math.random() *
+                              LeetcodeProblems['Two Pointer'][
+                                snippetLeetCodeDifficulty
+                              ].length
+                          )
+                        ]
+                    }
+
+                    prompt = `Leetcode ${snippetLeetCodeLang} problem #${problemNum}`
+                  }
+                } else if (
+                  snippetType === 'React' ||
+                  snippetType === 'Angular'
+                ) {
+                  prompt = `${snippetType} ${snippetWebDevLang} example`
+                } else {
+                  prompt = `${snippetType} example`
+                }
+
+                console.log(prompt)
+
+                const response = await getOpenAIResponse(prompt)
+                setSnippet(response.choices[0].message.content)
+                console.log(response)
+              }}
+            />
+          </div>
+          <Snippet
+            snippet={snippet}
+            input={input}
+            setInput={setInput}
+            currLine={currLine}
+            currWord={currWord}
+            currChar={currChar}
+            setCurrLine={setCurrLine}
+            setCurrWord={setCurrWord}
+            setCurrChar={setCurrChar}
+            numSpaceEnterInputs={numSpaceEnterInputs}
+            setNumSpaceEnterInputs={setNumSpaceEnterInputs}
+            startTime={startTime}
+            setStartTime={setStartTime}
+            endTime={endTime}
+            setEndTime={setEndTime}
+            isFocused={isFocused}
+            setIsFocused={setIsFocused}
+            inputRef={inputRef}
+          />
+        </main>
+        <footer></footer>
+      </div>
+    </ConfigProvider>
   )
 }
 
