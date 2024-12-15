@@ -21,15 +21,12 @@ type InputEntry = {
   typedChars: string[]
 }
 
-const isMatchingChars = (input: InputEntry) => {
-  return (
-    input.typedChars.length === input.actualChars.length &&
-    input.typedChars.every(
-      (typedChar, typedCharIndex) =>
-        typedChar === input.actualChars[typedCharIndex]
-    )
+const isMatchingChars = (input: InputEntry) =>
+  input.typedChars.length === input.actualChars.length &&
+  input.typedChars.every(
+    (typedChar, typedCharIndex) =>
+      typedChar === input.actualChars[typedCharIndex]
   )
-}
 
 const getNumCorrectChars = (
   input: InputEntry[],
@@ -40,22 +37,24 @@ const getNumCorrectChars = (
       return includeIncompleteWords || isMatchingChars(entry)
     })
     .reduce((acc, entry) => {
-      return (
-        acc +
-        entry.typedChars.filter((char, charIndex) => {
-          return char === entry.actualChars[charIndex]
-        }).length
-      )
+      return acc + getNumCorrectCharsSingleWord(entry)
     }, 0)
 
+const getNumCorrectCharsSingleWord = (input: InputEntry) =>
+  input.typedChars.filter((char, charIndex) => {
+    return char === input.actualChars[charIndex]
+  }).length
+
 // Number of extra characters typed (past the length of the actual characters)
+// Extra characters are counted only if the word is correct
+// Extra characters are capped at the number of correct characters in the word for accuracy calculation
 const getNumExtraChars = (input: InputEntry[]) =>
   input.reduce((acc, entry) => {
     return (
       acc +
       Math.min(
         Math.max(entry.typedChars.length - entry.actualChars.length, 0),
-        entry.actualChars.length
+        getNumCorrectCharsSingleWord(entry)
       )
     )
   }, 0)
@@ -209,8 +208,6 @@ function App() {
   }
 
   const handleAlphanumericKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Move to next character
-    setCurrChar((prev) => prev + 1)
     setInput((prevInput) => {
       const newInput = [...prevInput]
       const existingEntryIndex = newInput.findIndex(
@@ -219,19 +216,35 @@ function App() {
       if (existingEntryIndex !== -1) {
         newInput[existingEntryIndex].typedChars.push(e.key)
       }
+
+      // Move to next character
+      setCurrChar((prev) => prev + 1)
+
+      if (currChar === 0 && currWord === 0 && currLine === 0 && !startTime) {
+        setStartTime(Date.now())
+      } else if (
+        // last character of last word of last line
+        currLine === snippet.split('\n').length - 1 &&
+        currWord === snippet.split('\n')[currLine].split(' ').length - 1 &&
+        currChar ===
+          snippet.split('\n')[currLine].split(' ')[currWord].length - 1 &&
+        isMatchingChars(
+          newInput.find(
+            (entry) =>
+              entry.lineIndex === currLine && entry.wordIndex === currWord
+          ) ?? {
+            lineIndex: -1,
+            wordIndex: -1,
+            actualChars: [],
+            typedChars: []
+          }
+        )
+      ) {
+        setEndTime(Date.now())
+      }
+
       return newInput
     })
-
-    if (currChar === 0 && currWord === 0 && currLine === 0 && !startTime) {
-      setStartTime(Date.now())
-    } else if (
-      // last character of last word of last line
-      currLine === snippet.split('\n').length - 1 &&
-      currWord === snippet.split('\n')[currLine].split(' ').length - 1 &&
-      currChar === snippet.split('\n')[currLine].split(' ')[currWord].length - 1
-    ) {
-      setEndTime(Date.now())
-    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -298,7 +311,7 @@ function App() {
                     ) &&
                       ((currLine == lineIndex && currWord > wordIndex) ||
                         currLine > lineIndex) &&
-                      'underline decoration-red-500'
+                      'underline decoration-red-500 decoration-2 underline-offset-2'
                   )}
                 >
                   {char}
@@ -416,6 +429,7 @@ function App() {
             ? ((endTime - startTime) / 1000).toFixed(2)
             : 'Not finished'}
         </p>
+        {/* Need 75%+ accuracy to count */}
         <p>Accuracy: {(getAccuracy(input) * 100).toFixed(0)}%</p>
         <p>Raw accuracy: {(getRawAccuracy(input) * 100).toFixed(0)}%</p>
         <p>
@@ -430,6 +444,7 @@ function App() {
             ? getRawCPM(input, startTime, endTime, numSpaceEnterInputs)
             : 'Not finished'}
         </p>
+        <p>getNumCorrectChars: {getNumCorrectChars(input)}</p>
       </main>
       <footer></footer>
     </div>
