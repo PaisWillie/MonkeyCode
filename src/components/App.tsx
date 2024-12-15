@@ -344,7 +344,9 @@ function App() {
     }
   ]
 
-  const handleSelectSnippetLeetCodeTopic = (topic: LeetCodeCategories) => {
+  const handleSelectSnippetLeetCodeTopic = (
+    topic: LeetCodeCategories | 'a specific problem'
+  ) => {
     setSnippetLeetCodeDifficulty(undefined)
     setSnippetLeetCodeProblemNum(0)
 
@@ -680,7 +682,6 @@ function App() {
                 setNumSpaceEnterInputs(0)
                 setStartTime(null)
                 setEndTime(null)
-                initializeInput()
               }}
             />
           </div>
