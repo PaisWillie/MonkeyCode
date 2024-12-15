@@ -673,7 +673,14 @@ function App() {
 
                 const response = await getOpenAIResponse(prompt)
                 setSnippet(response.choices[0].message.content)
-                console.log(response)
+
+                setCurrLine(0)
+                setCurrWord(0)
+                setCurrChar(0)
+                setNumSpaceEnterInputs(0)
+                setStartTime(null)
+                setEndTime(null)
+                initializeInput()
               }}
             />
           </div>

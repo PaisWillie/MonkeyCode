@@ -263,7 +263,7 @@ const Snippet = ({
               wordIndex === currWord &&
               lineIndex === currLine ? (
                 <span key={`${lineIndex}-${wordIndex}-${charIndex}`}>
-                  <span className="absolute -translate-x-1 animate-blink text-white">
+                  <span className="absolute -translate-x-1 animate-blink text-slate-200">
                     |
                   </span>
                   {char}
@@ -278,7 +278,7 @@ const Snippet = ({
                           entry.lineIndex === lineIndex &&
                           entry.wordIndex === wordIndex
                       )?.typedChars[charIndex]
-                      ? 'text-white'
+                      ? 'text-slate-200'
                       : charIndex <
                           (input.find(
                             (entry) =>
@@ -329,7 +329,7 @@ const Snippet = ({
                         className="text-red-700"
                       >
                         {char}
-                        <span className="absolute -translate-x-1 animate-blink text-white">
+                        <span className="absolute -translate-x-1 animate-blink text-slate-200">
                           |
                         </span>
                       </span>
@@ -365,7 +365,7 @@ const Snippet = ({
               lineIndex === currLine &&
               word.length === currChar ? (
                 <span key={`space-${lineIndex}-${wordIndex}`}>
-                  <span className="absolute -translate-x-1 animate-blink text-white">
+                  <span className="absolute -translate-x-1 animate-blink text-slate-200">
                     |
                   </span>{' '}
                 </span>
