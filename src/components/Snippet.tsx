@@ -391,7 +391,7 @@ const Snippet = ({
         onBlur={() => setIsFocused(false)}
         onKeyDown={handleKeyDown}
       ></input>
-      <p className="mt-4">
+      {/* <p className="mt-4">
         Line: {currLine} Word: {currWord} Char: {currChar}
       </p>
       <p>
@@ -410,7 +410,7 @@ const Snippet = ({
       <p>
         End time:{' '}
         {endTime ? new Date(endTime).toLocaleTimeString() : 'Not finished'}
-      </p>
+      </p> */}
       <p>
         Time taken:{' '}
         {startTime && endTime
@@ -432,7 +432,7 @@ const Snippet = ({
           ? getRawCPM(input, startTime, endTime, numSpaceEnterInputs)
           : 'Not finished'}
       </p>
-      <p>getNumCorrectChars: {getNumCorrectChars(input)}</p>
+      {/* <p>getNumCorrectChars: {getNumCorrectChars(input)}</p> */}
     </>
   )
 }
