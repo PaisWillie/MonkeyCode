@@ -248,6 +248,10 @@ function App() {
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (endTime) {
+      return
+    }
+
     const wordsInLine = snippet.split('\n')[currLine].split(' ')
     const lines = snippet.split('\n')
 
