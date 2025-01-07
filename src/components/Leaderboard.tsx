@@ -1,15 +1,7 @@
 import { ConfigProvider, Table, theme } from 'antd'
 import clsx from 'clsx'
 import background from '../assets/background.jpg'
-
-interface DataType {
-  key: string
-  name: string
-  cpm: number
-  testType: string
-  accuracy: string
-  rawCpm: number
-}
+import { data, DataType } from 'data/leaderboard'
 
 const columns = [
   {
@@ -41,33 +33,6 @@ const columns = [
     dataIndex: 'accuracy',
     key: 'accuracy',
     sorter: (a: DataType, b: DataType) => a.accuracy.localeCompare(b.accuracy)
-  }
-]
-
-const data: DataType[] = [
-  {
-    key: '1',
-    name: 'John Brown',
-    cpm: 300,
-    testType: 'Standard',
-    accuracy: '95%',
-    rawCpm: 320
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    cpm: 280,
-    testType: 'Advanced',
-    accuracy: '92%',
-    rawCpm: 290
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    cpm: 320,
-    testType: 'Standard',
-    accuracy: '97%',
-    rawCpm: 340
   }
 ]
 
