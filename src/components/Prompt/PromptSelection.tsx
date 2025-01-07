@@ -35,6 +35,7 @@ import {
   SiTypescript
 } from 'react-icons/si'
 import { TbBinaryTree } from 'react-icons/tb'
+import clsx from 'clsx'
 
 const API_KEY = import.meta.env.VITE_OPENAI_API_KEY
 
@@ -99,6 +100,8 @@ const PromptSelection = ({
   setIsGPTReady,
   setShowLoadingBar
 }: PromptSelectionProps) => {
+  const [snippetLoading, setSnippetLoading] = useState(false)
+
   const [snippetType, setSnippetType] = useState<
     snippetTypeOptions | undefined
   >()
@@ -456,7 +459,12 @@ const PromptSelection = ({
   ]
 
   return (
-    <div className="flex flex-row items-center gap-2 text-slate-200">
+    <div
+      className={clsx([
+        'flex flex-row items-center gap-2 text-slate-200 transition-all',
+        snippetLoading && 'opacity-50'
+      ])}
+    >
       <p>I want to type</p>
       <DropdownSelect items={snippetTypes} label={snippetType} />
 
@@ -528,9 +536,11 @@ const PromptSelection = ({
         variant="solid"
         shape="circle"
         icon={<FaArrowRight />}
+        disabled={snippetLoading}
         onClick={async () => {
           setIsGPTReady(false)
           setShowLoadingBar(true)
+          setSnippetLoading(true)
           let prompt = ''
 
           if (snippetType === 'LeetCode') {
@@ -630,6 +640,7 @@ const PromptSelection = ({
           const response = await getOpenAIResponse(prompt)
           setSnippet(response.choices[0].message.content)
           setIsGPTReady(true)
+          setSnippetLoading(false)
           resetCounter()
         }}
       />
