@@ -117,9 +117,7 @@ function App() {
   const [startTime, setStartTime] = useState<number | null>(null)
   const [endTime, setEndTime] = useState<number | null>(null)
 
-  const [selectedPrompt, setSelectedPrompt] = useState<string>(
-    'LeetCode Python Arrays Easy'
-  )
+  const [selectedPrompt, setSelectedPrompt] = useState<string>('')
 
   const [cpm, setCpm] = useState<string>('')
   const [rawCpm, setRawCpm] = useState<string>('')
