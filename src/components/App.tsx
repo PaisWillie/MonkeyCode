@@ -1,11 +1,11 @@
-import { Button, ConfigProvider, theme } from 'antd'
+import { ConfigProvider, theme } from 'antd'
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import background from '../assets/background.jpg'
+import ProgressBar from './ProgressBar/ProgressBar'
 import PromptSelection from './Prompt/PromptSelection'
 import Sidebar from './Sidebar/Sidebar'
 import Snippet from './Snippet'
-import ProgressBar from './ProgressBar/ProgressBar'
 
 const testSnippet = `def func():
     print("Hello, World!")`

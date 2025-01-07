@@ -1,3 +1,5 @@
+import clsx from 'clsx'
+
 type SidebarProps = {
   cpm: string
   accuracy: string
@@ -17,23 +19,33 @@ const Sidebar = ({
     <div className="flex flex-col">
       <div className="flex flex-col">
         <span>cpm</span>
-        <span className="text-white">{cpm}</span>
+        <span className={clsx([cpm ? 'text-white' : 'text-slate-400'])}>
+          {cpm || 'TBD'}
+        </span>
       </div>
       <div className="flex flex-col">
         <span>raw cpm</span>
-        <span className="text-white">{rawCpm}</span>
+        <span className={clsx([cpm ? 'text-white' : 'text-slate-400'])}>
+          {rawCpm || 'TBD'}
+        </span>
       </div>
       <div className="flex flex-col">
         <span>accuracy</span>
-        <span className="text-white">{accuracy}</span>
+        <span className={clsx([cpm ? 'text-white' : 'text-slate-400'])}>
+          {accuracy || 'TBD'}
+        </span>
       </div>
       <div className="flex flex-col">
         <span>raw accuracy</span>
-        <span className="text-white">{rawAccuracy}</span>
+        <span className={clsx([cpm ? 'text-white' : 'text-slate-400'])}>
+          {rawAccuracy || 'TBD'}
+        </span>
       </div>
       <div className="flex flex-col">
         <span>time</span>
-        <span className="text-white">{time}</span>
+        <span className={clsx([cpm ? 'text-white' : 'text-slate-400'])}>
+          {time || 'TBD'}s
+        </span>
       </div>
     </div>
   )
