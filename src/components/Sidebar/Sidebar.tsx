@@ -15,6 +15,8 @@ const Sidebar = ({
   rawAccuracy,
   time
 }: SidebarProps) => {
+  const isValid = accuracy && parseFloat(accuracy) >= 70
+
   return (
     <div className="flex flex-col gap-y-6">
       <div className="flex flex-col">
@@ -22,7 +24,7 @@ const Sidebar = ({
         <span
           className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-500'])}
         >
-          {cpm || 'null'}
+          {accuracy === '' ? 'null' : isValid ? cpm || 'null' : 'invalid'}
         </span>
       </div>
       <div className="flex flex-col">
@@ -30,13 +32,16 @@ const Sidebar = ({
         <span
           className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-500'])}
         >
-          {rawCpm || 'null'}
+          {accuracy === '' ? 'null' : isValid ? rawCpm || 'null' : 'invalid'}
         </span>
       </div>
       <div className="flex flex-col">
         <span>accuracy</span>
         <span
-          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-500'])}
+          className={clsx([
+            metricStyle,
+            accuracy ? 'text-white' : 'text-slate-500'
+          ])}
         >
           {accuracy || 'null'}
         </span>
@@ -44,7 +49,10 @@ const Sidebar = ({
       <div className="flex flex-col">
         <span>raw accuracy</span>
         <span
-          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-500'])}
+          className={clsx([
+            metricStyle,
+            rawAccuracy ? 'text-white' : 'text-slate-500'
+          ])}
         >
           {rawAccuracy || 'null'}
         </span>
@@ -52,9 +60,12 @@ const Sidebar = ({
       <div className="flex flex-col">
         <span>time</span>
         <span
-          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-500'])}
+          className={clsx([
+            metricStyle,
+            time ? 'text-white' : 'text-slate-500'
+          ])}
         >
-          {time ? time + 's' : 'null'}
+          {time || 'null'}
         </span>
       </div>
     </div>
