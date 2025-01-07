@@ -42,14 +42,6 @@ const ProgressBar = ({ setLoadingBarPercent }: ProgressBarProps) => {
         status="active"
         strokeColor={{ from: '#108ee9', to: '#87d068' }}
       />
-      <Button
-        type="primary"
-        onClick={() => {
-          setPercent(0)
-        }}
-      >
-        Reset
-      </Button>
     </div>
   )
 }
