@@ -26,7 +26,8 @@ const columns = [
   {
     title: 'Test type',
     dataIndex: 'testType',
-    key: 'testType'
+    key: 'testType',
+    sorter: (a: DataType, b: DataType) => a.testType.localeCompare(b.testType)
   },
   {
     title: 'Accuracy',
