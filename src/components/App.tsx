@@ -132,9 +132,23 @@ function App() {
   useEffect(() => {
     // Is Finished
     if (startTime !== null && endTime !== null) {
-      setAccuracy(`${(getAccuracy(input) * 100).toFixed(0)}%`)
+      const accuracyValue = getAccuracy(input) * 100
+      setAccuracy(
+        `${
+          accuracyValue >= 99 && accuracyValue < 100
+            ? 99
+            : accuracyValue.toFixed(0)
+        }%`
+      )
+      const rawAccuracyValue = getRawAccuracy(input) * 100
+      setRawAccuracy(
+        `${
+          rawAccuracyValue >= 99 && rawAccuracyValue < 100
+            ? 99
+            : rawAccuracyValue.toFixed(0)
+        }%`
+      )
       setRawCpm(getRawCPM(input, startTime, endTime, numSpaceEnterInputs))
-      setRawAccuracy(`${(getRawAccuracy(input) * 100).toFixed(0)}%`)
       setTime(((endTime - startTime) / 1000).toFixed(2))
       setCpm(getCPM(input, startTime, endTime, numSpaceEnterInputs))
     }
