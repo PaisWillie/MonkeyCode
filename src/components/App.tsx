@@ -181,6 +181,11 @@ function App() {
     setNumSpaceEnterInputs(0)
     setStartTime(null)
     setEndTime(null)
+    setCpm('')
+    setRawCpm('')
+    setRawAccuracy('')
+    setAccuracy('')
+    setTime('')
   }
 
   return (
