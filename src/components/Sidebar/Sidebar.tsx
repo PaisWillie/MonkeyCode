@@ -16,45 +16,45 @@ const Sidebar = ({
   time
 }: SidebarProps) => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-y-6">
       <div className="flex flex-col">
         <span>cpm</span>
         <span
-          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-400'])}
+          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-500'])}
         >
-          {cpm || 'TBD'}
+          {cpm || 'null'}
         </span>
       </div>
       <div className="flex flex-col">
         <span>raw cpm</span>
         <span
-          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-400'])}
+          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-500'])}
         >
-          {rawCpm || 'TBD'}
+          {rawCpm || 'null'}
         </span>
       </div>
       <div className="flex flex-col">
         <span>accuracy</span>
         <span
-          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-400'])}
+          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-500'])}
         >
-          {accuracy || 'TBD'}
+          {accuracy || 'null'}
         </span>
       </div>
       <div className="flex flex-col">
         <span>raw accuracy</span>
         <span
-          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-400'])}
+          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-500'])}
         >
-          {rawAccuracy || 'TBD'}
+          {rawAccuracy || 'null'}
         </span>
       </div>
       <div className="flex flex-col">
         <span>time</span>
         <span
-          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-400'])}
+          className={clsx([metricStyle, cpm ? 'text-white' : 'text-slate-500'])}
         >
-          {time ? time + 's' : 'TBD'}
+          {time ? time + 's' : 'null'}
         </span>
       </div>
     </div>
