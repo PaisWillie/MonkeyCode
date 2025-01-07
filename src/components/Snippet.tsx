@@ -1,6 +1,6 @@
 import clsx from 'clsx'
+import React, { useCallback } from 'react'
 import { InputEntry, isMatchingChars } from './App'
-import React, { useCallback, useMemo } from 'react'
 
 type SnippetProps = {
   snippet: string
