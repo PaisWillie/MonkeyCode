@@ -31,7 +31,7 @@ const ProgressBar = ({ setLoadingBarPercent }: ProgressBarProps) => {
   }, [setLoadingBarPercent])
 
   return (
-    <div className="mx-48 mt-48 flex flex-1 flex-col items-center">
+    <div className="mx-48 mt-64 flex flex-1 flex-col items-center">
       <p className="text-white">
         {percent < 98
           ? 'Requesting snippet from ChatGPT...'
