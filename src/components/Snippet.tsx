@@ -1,89 +1,7 @@
-import { InputEntry } from './App'
 import clsx from 'clsx'
+import { InputEntry, isMatchingChars } from './App'
 
-const isMatchingChars = (input: InputEntry) =>
-  input.typedChars.length === input.actualChars.length &&
-  input.typedChars.every(
-    (typedChar, typedCharIndex) =>
-      typedChar === input.actualChars[typedCharIndex]
-  )
-
-const getNumCorrectChars = (
-  input: InputEntry[],
-  includeIncompleteWords?: boolean
-) =>
-  input
-    .filter((entry) => {
-      return includeIncompleteWords || isMatchingChars(entry)
-    })
-    .reduce((acc, entry) => {
-      return acc + getNumCorrectCharsSingleWord(entry)
-    }, 0)
-
-const getNumCorrectCharsSingleWord = (input: InputEntry) =>
-  input.typedChars.filter((char, charIndex) => {
-    return char === input.actualChars[charIndex]
-  }).length
-
-// Number of extra characters typed (past the length of the actual characters)
-// Extra characters are counted only if the word is correct
-// Extra characters are capped at the number of correct characters in the word for accuracy calculation
-const getNumExtraChars = (input: InputEntry[]) =>
-  input.reduce((acc, entry) => {
-    return (
-      acc +
-      Math.min(
-        Math.max(entry.typedChars.length - entry.actualChars.length, 0),
-        getNumCorrectCharsSingleWord(entry)
-      )
-    )
-  }, 0)
-
-// Number of total characters needed to type
-const getTotalChars = (input: InputEntry[]) =>
-  input.reduce((acc, entry) => acc + entry.actualChars.length, 0)
-
-// Accuracy = (Number of correct characters) / (Total number of characters)
-const getAccuracy = (input: InputEntry[]) => {
-  const totalChars = getTotalChars(input)
-  return totalChars ? getNumCorrectChars(input) / totalChars : 0
-}
-
-// Raw accuracy = (Number of correct characters - Number of extra characters) / (Total number of characters)
-const getRawAccuracy = (input: InputEntry[]) => {
-  const totalChars = getTotalChars(input)
-  return totalChars
-    ? (getNumCorrectChars(input, true) - getNumExtraChars(input)) / totalChars
-    : 0
-}
-
-// Characters per minute = (Number of correct characters + Number of space/enter inputs) / (Time taken in minutes)
-const getCPM = (
-  input: InputEntry[],
-  startTime: number,
-  endTime: number,
-  numSpaceEnterInputs: number
-) =>
-  (
-    (getNumCorrectChars(input) + numSpaceEnterInputs) /
-    ((endTime - startTime) / 1000 / 60)
-  ).toFixed(0)
-
-// Raw characters per minute = (Number of correct characters + Number of space/enter inputs) / (Time taken in minutes)
-const getRawCPM = (
-  input: InputEntry[],
-  startTime: number,
-  endTime: number,
-  numSpaceEnterInputs: number
-) =>
-  (
-    (getNumCorrectChars(input, true) +
-      numSpaceEnterInputs -
-      getNumExtraChars(input)) /
-    ((endTime - startTime) / 1000 / 60)
-  ).toFixed(0)
-
-type SnippetType = {
+type SnippetProps = {
   snippet: string
   inputRef: React.RefObject<HTMLInputElement>
   isFocused: boolean
@@ -94,7 +12,6 @@ type SnippetType = {
   setCurrWord: React.Dispatch<React.SetStateAction<number>>
   currChar: number
   setCurrChar: React.Dispatch<React.SetStateAction<number>>
-  numSpaceEnterInputs: number
   setNumSpaceEnterInputs: React.Dispatch<React.SetStateAction<number>>
   input: InputEntry[]
   setInput: React.Dispatch<React.SetStateAction<InputEntry[]>>
@@ -114,7 +31,6 @@ const Snippet = ({
   setCurrWord,
   currChar,
   setCurrChar,
-  numSpaceEnterInputs,
   setNumSpaceEnterInputs,
   input,
   setInput,
@@ -122,7 +38,7 @@ const Snippet = ({
   setStartTime,
   endTime,
   setEndTime
-}: SnippetType) => {
+}: SnippetProps) => {
   const handlePreClick = () => {
     inputRef.current?.focus()
   }
@@ -266,7 +182,7 @@ const Snippet = ({
                   <span className="absolute -translate-x-1 animate-blink text-slate-200">
                     |
                   </span>
-                  {char}
+                  <span className={clsx(textStyle.incomplete)}>{char}</span>
                 </span>
               ) : (
                 <span
@@ -286,7 +202,7 @@ const Snippet = ({
                               entry.wordIndex === wordIndex
                           )?.typedChars.length ?? 0)
                         ? 'text-red-500'
-                        : 'text-[#646669]',
+                        : textStyle.incomplete,
                     !isMatchingChars(
                       input.find(
                         (entry) =>
@@ -380,7 +296,7 @@ const Snippet = ({
   }
 
   return (
-    <>
+    <div>
       <pre onClick={handlePreClick} className="cursor-text select-none">
         {renderSnippet(snippet)}
       </pre>
@@ -411,13 +327,13 @@ const Snippet = ({
         End time:{' '}
         {endTime ? new Date(endTime).toLocaleTimeString() : 'Not finished'}
       </p> */}
-      <p>
+      {/* <p>
         Time taken:{' '}
         {startTime && endTime
           ? ((endTime - startTime) / 1000).toFixed(2)
           : 'Not finished'}
       </p>
-      {/* Need 75%+ accuracy to count */}
+      -- 75% accuracy required --
       <p>Accuracy: {(getAccuracy(input) * 100).toFixed(0)}%</p>
       <p>Raw accuracy: {(getRawAccuracy(input) * 100).toFixed(0)}%</p>
       <p>
@@ -431,10 +347,14 @@ const Snippet = ({
         {startTime && endTime
           ? getRawCPM(input, startTime, endTime, numSpaceEnterInputs)
           : 'Not finished'}
-      </p>
+      </p> */}
       {/* <p>getNumCorrectChars: {getNumCorrectChars(input)}</p> */}
-    </>
+    </div>
   )
+}
+
+const textStyle = {
+  incomplete: 'text-slate-400'
 }
 
 export default Snippet

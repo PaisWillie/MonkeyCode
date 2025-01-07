@@ -87,11 +87,17 @@ type leetCodeLangOptions =
 type PromptSelectionProps = {
   setSnippet: (snippet: string) => void
   resetCounter: () => void
+  setSelectedPrompt: (prompt: string) => void
+  setIsGPTReady: (isGPTReady: boolean) => void
+  setShowLoadingBar: (showLoadingBar: boolean) => void
 }
 
 const PromptSelection = ({
   setSnippet,
-  resetCounter
+  resetCounter,
+  setSelectedPrompt,
+  setIsGPTReady,
+  setShowLoadingBar
 }: PromptSelectionProps) => {
   const [snippetType, setSnippetType] = useState<
     snippetTypeOptions | undefined
@@ -523,6 +529,8 @@ const PromptSelection = ({
         shape="circle"
         icon={<FaArrowRight />}
         onClick={async () => {
+          setIsGPTReady(false)
+          setShowLoadingBar(true)
           let prompt = ''
 
           if (snippetType === 'LeetCode') {
@@ -603,16 +611,25 @@ const PromptSelection = ({
 
               prompt = `Leetcode ${snippetLeetCodeLang} problem #${problemNum}`
             }
+
+            setSelectedPrompt(
+              `${snippetType} ${snippetLeetCodeLang} ${snippetLeetCodeTopic} ${snippetLeetCodeDifficulty}`
+            )
           } else if (snippetType === 'React' || snippetType === 'Angular') {
             prompt = `${snippetType} ${snippetWebDevLang} example`
+
+            setSelectedPrompt(`${snippetType} ${snippetWebDevLang}`)
           } else {
             prompt = `${snippetType} example`
+
+            setSelectedPrompt(`${snippetType}`)
           }
 
           console.log(prompt)
 
           const response = await getOpenAIResponse(prompt)
           setSnippet(response.choices[0].message.content)
+          setIsGPTReady(true)
           resetCounter()
         }}
       />
