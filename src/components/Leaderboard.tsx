@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ConfigProvider, Table, theme, Button, Modal, Form, Input } from 'antd'
 import clsx from 'clsx'
 import background from '../assets/background.jpg'
@@ -45,37 +45,17 @@ const columns = [
   }
 ]
 
-const initialData: DataType[] = [
-  {
-    key: '1',
-    name: 'John Brown',
-    cpm: 300,
-    testType: 'Standard',
-    accuracy: '95%',
-    rawCpm: 320
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    cpm: 280,
-    testType: 'Advanced',
-    accuracy: '92%',
-    rawCpm: 290
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    cpm: 320,
-    testType: 'Standard',
-    accuracy: '97%',
-    rawCpm: 340
-  }
-]
-
 const Leaderboard = () => {
-  const [data, setData] = useState<DataType[]>(initialData)
+  const [data, setData] = useState<DataType[]>([])
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [form] = Form.useForm()
+
+  useEffect(() => {
+    const storedData = localStorage.getItem('leaderboardData')
+    if (storedData) {
+      setData(JSON.parse(storedData))
+    }
+  }, [])
 
   const showModal = () => {
     setIsModalVisible(true)
@@ -88,7 +68,9 @@ const Leaderboard = () => {
         key: (data.length + 1).toString(),
         accuracy: `${values.accuracy}%`
       }
-      setData([...data, newEntry])
+      const newData = [...data, newEntry]
+      setData(newData)
+      localStorage.setItem('leaderboardData', JSON.stringify(newData))
       setIsModalVisible(false)
       form.resetFields()
     })
