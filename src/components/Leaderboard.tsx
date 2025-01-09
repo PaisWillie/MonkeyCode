@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react'
-import { ConfigProvider, Table, theme, Button, Modal, Form, Input } from 'antd'
+import {
+  ConfigProvider,
+  Table,
+  theme,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Popconfirm
+} from 'antd'
 import clsx from 'clsx'
 import background from '../assets/background.jpg'
 import { SortOrder } from 'antd/es/table/interface'
@@ -13,14 +22,14 @@ interface DataType {
   rawCpm: number
 }
 
-const columns = [
+const columns = (handleDelete: (key: string) => void) => [
   {
     title: 'Name',
     dataIndex: 'name',
     key: 'name'
   },
   {
-    title: 'Characters per minute (CPM)',
+    title: 'CPM',
     dataIndex: 'cpm',
     key: 'cpm',
     sorter: (a: DataType, b: DataType) => a.cpm - b.cpm,
@@ -42,6 +51,22 @@ const columns = [
     dataIndex: 'accuracy',
     key: 'accuracy',
     sorter: (a: DataType, b: DataType) => a.accuracy.localeCompare(b.accuracy)
+  },
+  {
+    title: 'Action',
+    key: 'action',
+    render: (_: unknown, record: DataType) => (
+      <Popconfirm
+        title="Are you sure you want to delete this entry?"
+        onConfirm={() => handleDelete(record.key)}
+        okText="Yes"
+        cancelText="No"
+      >
+        <Button type="link" danger>
+          Delete
+        </Button>
+      </Popconfirm>
+    )
   }
 ]
 
@@ -79,6 +104,12 @@ const Leaderboard = () => {
   const handleCancel = () => {
     setIsModalVisible(false)
     form.resetFields()
+  }
+
+  const handleDelete = (key: string) => {
+    const newData = data.filter((item) => item.key !== key)
+    setData(newData)
+    localStorage.setItem('leaderboardData', JSON.stringify(newData))
   }
 
   return (
@@ -130,7 +161,7 @@ const Leaderboard = () => {
               ])}
             >
               <Table<DataType>
-                columns={columns}
+                columns={columns(handleDelete)}
                 dataSource={data}
                 scroll={{ y: 400 }}
                 pagination={false} // Hide pagination
@@ -159,7 +190,7 @@ const Leaderboard = () => {
           </Form.Item>
           <Form.Item
             name="cpm"
-            label="Characters per minute (CPM)"
+            label="CPM"
             rules={[{ required: true, message: 'Please enter the CPM' }]}
           >
             <Input type="number" />
