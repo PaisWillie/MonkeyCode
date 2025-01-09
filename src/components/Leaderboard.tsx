@@ -1,21 +1,30 @@
-import { ConfigProvider, Table, theme } from 'antd'
+import { useState } from 'react'
+import { ConfigProvider, Table, theme, Button, Modal, Form, Input } from 'antd'
 import clsx from 'clsx'
 import background from '../assets/background.jpg'
-import { data, DataType } from 'data/leaderboard'
+import { SortOrder } from 'antd/es/table/interface'
+
+interface DataType {
+  key: string
+  name: string
+  cpm: number
+  testType: string
+  accuracy: string
+  rawCpm: number
+}
 
 const columns = [
   {
     title: 'Name',
     dataIndex: 'name',
-    key: 'name',
-    sorter: (a: DataType, b: DataType) => a.name.localeCompare(b.name)
+    key: 'name'
   },
   {
-    title: 'CPM',
+    title: 'Characters per minute (CPM)',
     dataIndex: 'cpm',
     key: 'cpm',
     sorter: (a: DataType, b: DataType) => a.cpm - b.cpm,
-    defaultSortOrder: 'descend' as const
+    defaultSortOrder: 'descend' as SortOrder
   },
   {
     title: 'Raw CPM',
@@ -26,8 +35,7 @@ const columns = [
   {
     title: 'Test type',
     dataIndex: 'testType',
-    key: 'testType',
-    sorter: (a: DataType, b: DataType) => a.testType.localeCompare(b.testType)
+    key: 'testType'
   },
   {
     title: 'Accuracy',
@@ -37,7 +45,60 @@ const columns = [
   }
 ]
 
+const initialData: DataType[] = [
+  {
+    key: '1',
+    name: 'John Brown',
+    cpm: 300,
+    testType: 'Standard',
+    accuracy: '95%',
+    rawCpm: 320
+  },
+  {
+    key: '2',
+    name: 'Jim Green',
+    cpm: 280,
+    testType: 'Advanced',
+    accuracy: '92%',
+    rawCpm: 290
+  },
+  {
+    key: '3',
+    name: 'Joe Black',
+    cpm: 320,
+    testType: 'Standard',
+    accuracy: '97%',
+    rawCpm: 340
+  }
+]
+
 const Leaderboard = () => {
+  const [data, setData] = useState<DataType[]>(initialData)
+  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [form] = Form.useForm()
+
+  const showModal = () => {
+    setIsModalVisible(true)
+  }
+
+  const handleOk = () => {
+    form.validateFields().then((values) => {
+      const newEntry = {
+        ...values,
+        key: (data.length + 1).toString(),
+        accuracy: `${values.accuracy}%`
+      }
+      setData([...data, newEntry])
+      setIsModalVisible(false)
+      form.resetFields()
+    })
+  }
+
+  const handleCancel = () => {
+    setIsModalVisible(false)
+    form.resetFields()
+  }
+
   return (
     <ConfigProvider
       theme={{
@@ -61,10 +122,22 @@ const Leaderboard = () => {
           <header
             className={clsx([
               containerStyle,
-              'flex flex-row items-center justify-center text-xl text-white'
+              'grid grid-cols-3 items-center text-xl text-white'
             ])}
           >
-            SnippetSprint Leaderboard
+            <div />
+            <span className="text-center">Leaderboard</span>
+            <div className="flex justify-end">
+              <Button
+                type="primary"
+                onClick={showModal}
+                variant="filled"
+                color="default"
+                className="mr-3"
+              >
+                Add Entry
+              </Button>
+            </div>
           </header>
           <main className="row-span-11 mt-8 size-full">
             <div
@@ -88,6 +161,50 @@ const Leaderboard = () => {
           </main>
         </div>
       </div>
+      <Modal
+        title="Add Leaderboard Entry"
+        open={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[{ required: true, message: 'Please enter the name' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="cpm"
+            label="Characters per minute (CPM)"
+            rules={[{ required: true, message: 'Please enter the CPM' }]}
+          >
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item
+            name="rawCpm"
+            label="Raw CPM"
+            rules={[{ required: true, message: 'Please enter the raw CPM' }]}
+          >
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item
+            name="testType"
+            label="Test type"
+            rules={[{ required: true, message: 'Please enter the test type' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="accuracy"
+            label="Accuracy"
+            rules={[{ required: true, message: 'Please enter the accuracy' }]}
+          >
+            <Input type="number" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </ConfigProvider>
   )
 }
