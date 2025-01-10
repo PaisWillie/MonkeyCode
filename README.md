@@ -17,6 +17,8 @@
 ## Overview
 **SnippetSprint** is a code snippet typing racer, designed to hone your development speed and accuracy. Inspired by popular type racer sites like MonkeyType, it focuses specifically on **typing code** across various **programming languages** and **frameworks**.
 
+The UI was built from scratch, and designed by me. This project was developed within ~1 week for CUSEC 2025 Dev's Den competition.
+
 Built with:
 
 - [Vite](https://vitejs.dev)
