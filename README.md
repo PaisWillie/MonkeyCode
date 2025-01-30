@@ -1,4 +1,4 @@
-# SnippetSprint ⚡️
+# MonkeyCode ⚡️
 
 > **_Where code meets your fingertips._**
 > Race against the clock (and soon, against others!) to type out code snippets as fast as you can.
